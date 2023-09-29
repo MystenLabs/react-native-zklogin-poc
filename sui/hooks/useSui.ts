@@ -2,6 +2,7 @@ import {
   ExecuteTransactionRequestType,
   SuiClient,
   SuiTransactionBlockResponseOptions,
+  getFullnodeUrl,
 } from "@mysten/sui.js/client";
 
 interface ExecuteSignedTransactionBlockProps {
@@ -14,7 +15,7 @@ interface ExecuteSignedTransactionBlockProps {
 }
 
 export const useSui = () => {
-  const FULL_NODE = process.env.NEXT_PUBLIC_SUI_NETWORK!;
+  const FULL_NODE = process.env.NEXT_PUBLIC_SUI_NETWORK! || getFullnodeUrl('testnet');
 
   const suiClient = new SuiClient({ url: FULL_NODE });
 
