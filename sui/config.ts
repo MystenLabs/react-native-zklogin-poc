@@ -1,0 +1,7 @@
+export const SUI_NETWORK = "https://rpc.testnet.sui.io:443"
+export const BACKEND_API = "https://api-testnet.suifrens.sui.io"
+export const PACKAGE_ADDRESS = "0xf8294cd69d69d867c5a187a60e7095711ba237fad6718ea371bf4fbafbc5bb4b"
+export const ADMIN_ADDRESS = "0xe1e150679ba01ffbe19498c9a6885fb6d32191680b691d141a631986176aaee9"
+export const PRICE_ADMIN_CAP_ID = "0x7bfe53744b0cef3ec21da0ad284b91f4cd64fa933ba8e0b75a5f263c8543427e"
+export const PRICE_ORACLE_ID = "0xc29c6ef1486447211d0ed9dbb773be5de4fc31c2dd2a6f0de3500f9dc1b64ea7"
+export const ADMIN_SECRET_KEY = "AD9AkwDXwWTj3zpbWDS5rKuJPAmM4bJ4Kw5Nmnvx9yFO"
