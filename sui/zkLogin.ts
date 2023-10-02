@@ -1,10 +1,13 @@
-import {fromB64} from "@mysten/sui.js/utils";
+import {fromB64} from "@mysten/sui.js/dist/cjs/utils";
 import {SuiClient} from "@mysten/sui.js/client";
 import {UserKeyData} from "./types/UserInfo";
 import {Ed25519Keypair} from '@mysten/sui.js/keypairs/ed25519';
 import {generateNonce, generateRandomness} from '@mysten/zklogin';
 
-// import './shim.js'
+import 'fast-text-encoding';
+import 'react-native-url-polyfill/auto';
+import 'react-native-crypto';
+
 import {ADMIN_SECRET_KEY, SUI_NETWORK,} from "./config";
 
 console.log("Connecting to SUI network: ", SUI_NETWORK);
@@ -14,11 +17,6 @@ let adminPrivateKeyArray = Uint8Array.from(Array.from(fromB64(ADMIN_SECRET_KEY!)
 const adminKeypair = Ed25519Keypair.fromSecretKey(adminPrivateKeyArray.slice(1));
 const adminAddress = adminKeypair.getPublicKey().toSuiAddress();
 
-
-export const doLogin = async (suiClient: SuiClient) => {
-    console.log("Starting sign up with zkLogin");
-}
-
 export const prepareLogin = async (suiClient: SuiClient) => {
     const {epoch, epochDurationMs, epochStartTimestampMs} = await suiClient.getLatestSuiSystemState();
 
@@ -27,7 +25,7 @@ export const prepareLogin = async (suiClient: SuiClient) => {
     const ephemeralPrivateKeyB64 = ephemeralKeyPair.export().privateKey;
 
 
-    const ephemeralPublicKey = ephemeralKeyPair.getPublicKey()
+    const ephemeralPublicKey = ephemeralKeyPair.getPublicKey();
     const ephemeralPublicKeyB64 = ephemeralPublicKey.toBase64();
 
     const jwt_randomness = generateRandomness();
@@ -46,8 +44,11 @@ export const prepareLogin = async (suiClient: SuiClient) => {
         ephemeralPrivateKey: ephemeralPrivateKeyB64,
         maxEpoch: maxEpoch
     }
-    // RN apps should use async storage.
-    // localStorage.setItem("userKeyData", JSON.stringify(userKeyData));
+    localStorage.setItem("userKeyData", JSON.stringify(userKeyData));
     return userKeyData
 }
+
+
+
+
 
