@@ -48,7 +48,8 @@
     "tty-browserify": "0.0.0",
     "url": "~0.10.1",
     "util": "~0.10.3",
-    "vm-browserify": "0.0.4"
+    "vm-browserify": "0.0.4",
+    "react-native-webview": "^13.6.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

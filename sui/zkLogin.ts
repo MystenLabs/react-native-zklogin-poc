@@ -27,7 +27,7 @@ export const prepareLogin = async (suiClient: SuiClient) => {
     const ephemeralPrivateKeyB64 = ephemeralKeyPair.export().privateKey;
 
 
-    const ephemeralPublicKey = ephemeralKeyPair.getPublicKey()
+    const ephemeralPublicKey = ephemeralKeyPair.getPublicKey();
     const ephemeralPublicKeyB64 = ephemeralPublicKey.toBase64();
 
     const jwt_randomness = generateRandomness();
@@ -46,8 +46,9 @@ export const prepareLogin = async (suiClient: SuiClient) => {
         ephemeralPrivateKey: ephemeralPrivateKeyB64,
         maxEpoch: maxEpoch
     }
+
     // RN apps should use async storage.
-    // localStorage.setItem("userKeyData", JSON.stringify(userKeyData));
+    localStorage.setItem("userKeyData", JSON.stringify(userKeyData));
     return userKeyData
 }
 
