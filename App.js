@@ -1,10 +1,12 @@
+import 'fast-text-encoding';
+import 'react-native-url-polyfill/auto';
+import './sui/env'
+
 import {StatusBar} from 'expo-status-bar';
 import {Button, StyleSheet, Text, View} from 'react-native';
 import {useEffect} from "react";
 import {doLogin, prepareLogin} from "./sui/zkLogin";
 import {useSui} from "./sui/hooks/useSui";
-
-export const cryp = require('crypto');
 
 export default function App() {
 

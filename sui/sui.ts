@@ -2,8 +2,6 @@ import {Ed25519Keypair,} from "@mysten/sui.js/dist/cjs/keypairs/ed25519";
 import {fromB64} from "@mysten/sui.js/dist/cjs/utils";
 import {TransactionBlock} from "@mysten/sui.js/dist/cjs/builder";
 import {SuiClient} from "@mysten/sui.js/client";
-import 'fast-text-encoding';
-import 'react-native-url-polyfill/auto';
 
 import {ADMIN_SECRET_KEY, PACKAGE_ADDRESS, PRICE_ADMIN_CAP_ID, PRICE_ORACLE_ID, SUI_NETWORK,} from "./config";
 

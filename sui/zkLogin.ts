@@ -1,12 +1,9 @@
-import {fromB64} from "@mysten/sui.js/dist/cjs/utils";
+import {fromB64} from "@mysten/sui.js/utils";
 import {SuiClient} from "@mysten/sui.js/client";
 import {UserKeyData} from "./types/UserInfo";
 import {Ed25519Keypair} from '@mysten/sui.js/keypairs/ed25519';
 import {generateNonce, generateRandomness} from '@mysten/zklogin';
 
-import 'fast-text-encoding';
-import 'react-native-url-polyfill/auto';
-import 'react-native-crypto';
 // import './shim.js'
 import {ADMIN_SECRET_KEY, SUI_NETWORK,} from "./config";
 
@@ -49,7 +46,8 @@ export const prepareLogin = async (suiClient: SuiClient) => {
         ephemeralPrivateKey: ephemeralPrivateKeyB64,
         maxEpoch: maxEpoch
     }
-    localStorage.setItem("userKeyData", JSON.stringify(userKeyData));
+    // RN apps should use async storage.
+    // localStorage.setItem("userKeyData", JSON.stringify(userKeyData));
     return userKeyData
 }
 

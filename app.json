@@ -25,12 +25,6 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    },
-    "extra": {
-      "eas": {
-        "projectId": "c09c2942-41fe-4915-9fb3-65ac9fd4f401"
-      }
-    },
-    "owner": "vlegakis"
+    }
   }
 }
