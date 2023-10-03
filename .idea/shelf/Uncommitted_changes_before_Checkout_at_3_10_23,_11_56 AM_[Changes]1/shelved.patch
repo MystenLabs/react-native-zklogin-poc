@@ -1,0 +1,19 @@
+Index: App.js
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import {StatusBar} from 'expo-status-bar';\nimport {Button, StyleSheet, View} from 'react-native';\nimport {useEffect, useState} from \"react\";\nimport {prepareLogin} from \"./sui/zkLogin\";\nimport {useSui} from \"./sui/hooks/useSui\";\nimport {LoginWebView} from \"./sui/webView\";\n\nexport const cryp = require('crypto');\n\nexport default function App() {\n\n    const {suiClient} = useSui();\n    const [error, setError] = useState < string | null > (null);\n    const [loginData, setLoginData] = useState < string | null > (null);\n    const [loginUrl, setLoginUrl] = useState < string | null > (\"\");\n    const [loginDone, setLoginDone] = useState < boolean > (false);\n    const REDIRECT_URI = 'https://zklogin-dev-redirect.vercel.app/api/auth';\n\n    useEffect(() => {\n        // console.log(\"Doing transactions\")\n        // doActions()r\n    }, [])\n\n\n    const doZkLogin = async () => {\n\n        setLoginDone(true);\n\n        console.log(\"Starting sign up with zkLogin\");\n        prepareLogin(suiClient).then((userKeyData) => {\n\n            const customRedirectUri = getRedirectUri();\n            const params = new URLSearchParams({\n                // When using the provided test client ID + redirect site, the redirect_uri needs to be provided in the state.\n                state: new URLSearchParams({\n                    redirect_uri: customRedirectUri\n                }).toString(),\n                // Test Client ID for devnet / testnet:\n                client_id: '25769832374-famecqrhe2gkebt5fvqms2263046lj96.apps.googleusercontent.com',\n                redirect_uri: REDIRECT_URI,\n                response_type: 'id_token',\n                scope: 'openid',\n                nonce: userKeyData.nonce,\n            });\n            setLoginUrl(`https://accounts.google.com/o/oauth2/v2/auth?${params}`);\n        });\n    }\n\n    const getRedirectUri = () => {\n        const protocol = window.location.protocol;\n        const host = window.location.host;\n        const customRedirectUri = protocol + \"//\" + host + \"/auth\";\n        console.log(\"customRedirectUri = \" + customRedirectUri);\n        return customRedirectUri;\n    }\n\n    return (\n        <View style={styles.container}>\n            {loginDone && (<LoginWebView source={REDIRECT_URI}/>)}\n            <Button\n                onPress={doZkLogin}\n                title=\"zkLogin with Google\"\n                color=\"#000000\"\n                accessibilityLabel=\"zkLogin with Google\"\n            ></Button>\n            <StatusBar style=\"auto\"/>\n        </View>\n    );\n}\n\nconst styles = StyleSheet.create({\n    container: {\n        flex: 1,\n        backgroundColor: '#fff',\n        alignItems: 'center',\n        justifyContent: 'center',\n    },\n});\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/App.js b/App.js
+--- a/App.js	
++++ b/App.js	
+@@ -15,7 +15,7 @@
+     const [loginUrl, setLoginUrl] = useState < string | null > ("");
+     const [loginDone, setLoginDone] = useState < boolean > (false);
+     const REDIRECT_URI = 'https://zklogin-dev-redirect.vercel.app/api/auth';
+-
++    r
+     useEffect(() => {
+         // console.log("Doing transactions")
+         // doActions()r
