@@ -1,14 +1,15 @@
-import React, {FunctionComponent} from 'react';
+import {FunctionComponent} from 'react';
 import {WebView, WebViewNavigation} from 'react-native-webview';
 
 const onNavigationStateChange = (navigationState: WebViewNavigation) => {
-    const url2 = navigationState.url;
+    const url = navigationState.url;
+    console.log("onNavigationStateChange", url)
 
     // parseURLParams is a pseudo function.
     // Make sure to write your own function or install a package
     // const params = parseURLParams(url);
 
-    const url = "http://example.com?myVar=test&otherVariable=someData&number=123"
+    // const url = "http://example.com?myVar=test&otherVariable=someData&number=123"
 
     var regex = /[?&]([^=#]+)=([^&#]*)/g,
         params: any = {},
@@ -20,6 +21,7 @@ const onNavigationStateChange = (navigationState: WebViewNavigation) => {
 
     if (params.token) {
         // Save token for native requests & move to the next screen
+        console.log("My token:", params.token)
     }
 };
 

@@ -3,8 +3,9 @@ import {SuiClient} from "@mysten/sui.js/client";
 import {UserKeyData} from "./types/UserInfo";
 import {Ed25519Keypair} from '@mysten/sui.js/keypairs/ed25519';
 import {generateNonce, generateRandomness} from '@mysten/zklogin';
+// import EncryptedStorage from 'react-native-encrypted-storage';
 
-// import './shim.js'
+
 import {ADMIN_SECRET_KEY, SUI_NETWORK,} from "./config";
 
 console.log("Connecting to SUI network: ", SUI_NETWORK);
@@ -47,8 +48,33 @@ export const prepareLogin = async (suiClient: SuiClient) => {
         maxEpoch: maxEpoch
     }
 
-    // RN apps should use async storage.
-    localStorage.setItem("userKeyData", JSON.stringify(userKeyData));
+    // await setEncrypted(userKeyData)
+    // const data = await getEncrypted()
+    console.log("Saved", userKeyData)
     return userKeyData
 }
+
+// Use your existing means of storing encrypted data
+// async function setEncrypted(data: any, key = "data") {
+//     try {
+//         await EncryptedStorage.setItem(
+//             key,
+//             JSON.stringify(data)
+//         );
+//     } catch (error) {
+//         // There was an error on the native side
+//     }
+// }
+//
+// async function getEncrypted(key="data") {
+//     try {
+//         const dataString = await EncryptedStorage.getItem(key);
+//
+//         if (dataString !== undefined) {
+//             this.resolve(JSON.parse(dataString))// Congrats! You've just retrieved your first value!
+//         }
+//     } catch (error) {
+//         // There was an error on the native side
+//     }
+// }
 

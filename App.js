@@ -30,15 +30,16 @@ export default function App() {
         console.log("Starting sign up with zkLogin");
         prepareLogin(suiClient).then((userKeyData) => {
 
-            const customRedirectUri = getRedirectUri();
+            const customRedirectUri = redirectUri; //getRedirectUri();
             const params = new URLSearchParams({
                 // When using the provided test client ID + redirect site, the redirect_uri needs to be provided in the state.
                 state: new URLSearchParams({
                     redirect_uri: customRedirectUri
+
                 }).toString(),
                 // Test Client ID for devnet / testnet:
                 client_id: '25769832374-famecqrhe2gkebt5fvqms2263046lj96.apps.googleusercontent.com',
-                redirect_uri: REDIRECT_URI,
+                redirect_uri: redirectUri,
                 response_type: 'id_token',
                 scope: 'openid',
                 nonce: userKeyData.nonce,
@@ -58,12 +59,13 @@ export default function App() {
     return (
         <View style={styles.container}>
             {loginDone && (<LoginWebView source={redirectUri}/>)}
-            <Button
+            {!loginDone && (<Button
                 onPress={doZkLogin}
                 title="zkLogin with Google"
                 color="#000000"
+                style={{border: "1px solid"}}
                 accessibilityLabel="zkLogin with Google"
-            ></Button>
+            ></Button>)}
             <StatusBar style="auto"/>
         </View>
     );
