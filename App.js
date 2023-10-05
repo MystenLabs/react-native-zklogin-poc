@@ -38,7 +38,7 @@ export default function App() {
 
                 }).toString(),
                 // Test Client ID for devnet / testnet:
-                client_id: '25769832374-famecqrhe2gkebt5fvqms2263046lj96.apps.googleusercontent.com',
+                client_id: '70599191792-e7cuqm6pldc8ffp3hg9ie84n4d8u0stm.apps.googleusercontent.com',
                 redirect_uri: redirectUri,
                 response_type: 'id_token',
                 scope: 'openid',
