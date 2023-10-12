@@ -35,7 +35,6 @@ export default function App() {
                 // When using the provided test client ID + redirect site, the redirect_uri needs to be provided in the state.
                 state: new URLSearchParams({
                     redirect_uri: customRedirectUri
-
                 }).toString(),
                 // Test Client ID for devnet / testnet:
                 client_id: '70599191792-e7cuqm6pldc8ffp3hg9ie84n4d8u0stm.apps.googleusercontent.com',
@@ -62,7 +61,7 @@ export default function App() {
             {!loginDone && (<Button
                 onPress={doZkLogin}
                 title="zkLogin with Google"
-                color="#000000"
+                color="#6633FF"
                 style={{border: "1px solid"}}
                 accessibilityLabel="zkLogin with Google"
             ></Button>)}
