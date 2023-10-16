@@ -1,3 +1,4 @@
+// @ts-ignore
 import { useWalletKit } from "@mysten/wallet-kit";
 import { useEffect, useState } from "react";
 import { useSui } from "./useSui";
