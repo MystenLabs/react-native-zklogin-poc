@@ -18,8 +18,9 @@ import {
   FormValue,
   Heading,
 } from './components';
-import {doLogin, prepareLogin, getSaltFromMystenAPI, getZNPFromMystenAPI, UserKeyData} from "./sui/zkLogin";
+import {doLogin, prepareLogin, getSaltFromMystenAPI, getZNPFromMystenAPI, UserKeyData, LoginResponse} from "./sui/zkLogin";
 import {useSui} from "./sui/hooks/useSui";
+import jwt_decode from "jwt-decode";
 
 const configExamples = {
   identityserver: {
@@ -56,8 +57,8 @@ const configs = {
     issuer: 'https://accounts.google.com',
     clientId: '70599191792-e7cuqm6pldc8ffp3hg9ie84n4d8u0stm.apps.googleusercontent.com',
     redirectUrl: 'com.googleusercontent.apps.70599191792-e7cuqm6pldc8ffp3hg9ie84n4d8u0stm:/oauth2redirect/google',
-    scopes: ['openid', 'profile'],
-    response_type: 'id_token'
+    scopes: ['openid'],
+    response_type: 'id_token',
   }
 };
 
@@ -90,24 +91,35 @@ const App = () => {
         nonce: suiConst.nonce,
         ...configs.auth0,
       };
-      console.log("Google auth:", configuration)
       prefetchConfiguration(configuration);
 
-      const config = configs[provider];
-      const newAuthState = await authorize({
-        ...config,
+      const config = {
+        ...(configs[provider]),
+        nonce: suiConst.nonce,
         connectionTimeoutSeconds: 5,
         iosPrefersEphemeralSession: true,
-      });
+      };
+      console.log("Google auth request:", config);
+      const newAuthState = await authorize(config);
 
       setAuthState({
         hasLoggedInOnce: true,
         provider: provider,
         ...newAuthState,
       });
-      console.log("Auth state", newAuthState)
+
+      console.log('Google auth jwt :', newAuthState);
+      const decodedJwt: LoginResponse = jwt_decode(newAuthState.idToken);
+      console.log('Google auth response.nonce :', decodedJwt.nonce);
+
+      if (decodedJwt.nonce !== suiConst.nonce) {
+        Alert.alert('Missatching Google nonce! Your auth try was probably spoofed');
+        return;
+      }
 
       const salt = await getSaltFromMystenAPI(newAuthState.idToken);
+      // setSuiVars(...suiVars, salt);
+
       console.log("Salt:", salt);
 
       const zkp = await getZNPFromMystenAPI(newAuthState.idToken, salt, suiConst);
@@ -115,6 +127,7 @@ const App = () => {
 
     } catch (error) {
       Alert.alert('Failed to log in', error.message);
+      console.log("Error:", error);
     }
 
   }, []);

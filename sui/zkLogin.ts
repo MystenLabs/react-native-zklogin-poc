@@ -7,6 +7,8 @@ import axios from "axios";
 import jwt_decode from "jwt-decode"
 import {ADMIN_SECRET_KEY, SUI_NETWORK,} from "./config";
 import {toBigIntBE} from "bigint-buffer";
+import { AuthorizeResult } from "react-native-app-auth";
+import {Keypair, PublicKey} from "@mysten/sui.js/cryptography";
 
 console.log("Connecting to SUI network: ", SUI_NETWORK);
 
@@ -32,7 +34,7 @@ export interface UserKeyData {
     nonce: string;
     ephemeralPublicKey: string;
     ephemeralPrivateKey: string;
-    maxEpoch:number;
+    maxEpoch: number;
 };
 
 export const doLogin = async (suiClient: SuiClient) => {
@@ -43,21 +45,21 @@ export const prepareLogin = async (suiClient: SuiClient) => {
     const {epoch, epochDurationMs, epochStartTimestampMs} = await suiClient.getLatestSuiSystemState();
 
     const maxEpoch = parseInt(epoch) + 2; // this means the ephemeral key will be active for 2 epochs from now.
-    const ephemeralKeyPair = new Ed25519Keypair();
+    const ephemeralKeyPair : Keypair = new Ed25519Keypair();
     const ephemeralPrivateKeyB64 = ephemeralKeyPair.export().privateKey;
 
-
-    const ephemeralPublicKey = ephemeralKeyPair.getPublicKey();
+    const ephemeralPublicKey : PublicKey = ephemeralKeyPair.getPublicKey();
     const ephemeralPublicKeyB64 = ephemeralPublicKey.toBase64();
 
     const jwt_randomness = generateRandomness();
+    // @ts-ignore
     const nonce = generateNonce(ephemeralPublicKey, maxEpoch, jwt_randomness);
 
     // console.log("current epoch = " + epoch);
-    // console.log("maxEpoch = " + maxEpoch);
-    // console.log("jwt_randomness = " + jwt_randomness);
-    // console.log("ephemeral public key = " + ephemeralPublicKey);
-    // console.log("nonce = " + nonce);
+    console.log("maxEpoch = " + maxEpoch);
+    console.log("jwt_randomness generating nonce = ", jwt_randomness);
+    console.log("ephemeral public key = " + ephemeralPublicKeyB64);
+    console.log("generated nonce = " + nonce);
 
     const userKeyData: UserKeyData = {
         randomness: jwt_randomness.toString(),
@@ -73,10 +75,14 @@ export const prepareLogin = async (suiClient: SuiClient) => {
     return userKeyData
 }
 
-export async function getSaltFromMystenAPI(jwtEncoded : string ){
+export async function getSaltFromMystenAPI(jwtEncoded: string){
     const url = "https://salt.api.mystenlabs.com/get_salt";
+    // const decodedJwt: LoginResponse = jwt_decode(jwtEncoded) as LoginResponse;
+    // console.log("decodedJwt:", decodedJwt);
+
     const payload = { token: jwtEncoded };
 
+    // console.log("Getting salt:", payload, "decoded:", decodedJwt)
     const res = await axios.post(url, payload)
     return res.data.salt;
 }
@@ -85,12 +91,18 @@ export async function getZNPFromMystenAPI(jwtToken: string, salt: string, userKe
 
     const url = "https://prover.mystenlabs.com/v1";
     const decodedJwt: LoginResponse = jwt_decode(jwtToken) as LoginResponse;
-    const ephemeralKeyPairArray = Uint8Array.from(Array.from(fromB64(userKeyData.ephemeralPrivateKey!)));
-    const ephemeralKeyPair = Ed25519Keypair.fromSecretKey(ephemeralKeyPairArray);
+    // const ephemeralPrivateKeyArray = Uint8Array.from(Array.from(fromB64(userKeyData.ephemeralPrivateKey!)));
+    // const ephemeralKeyPair = Ed25519Keypair.fromSecretKey(ephemeralPrivateKeyArray);
 
     printUsefulInfo(decodedJwt, userKeyData);
 
     const ephemeralPublicKeyArray: Uint8Array = fromB64(userKeyData.ephemeralPublicKey);
+
+    // const uint8ArrayToBigInt = (bytes: Uint8Array): BigInt => {
+    //     const hex = "0x" + Array.from(bytes).map((byte) => byte.toString(16).padStart(2, "0")).join("");
+    //     return BigInt(hex);
+    // }
+
     const zkpPayload =
             {
                 jwt: jwtToken!,
@@ -99,12 +111,27 @@ export async function getZNPFromMystenAPI(jwtToken: string, salt: string, userKe
                 ).toString(),
                 jwtRandomness: userKeyData.randomness,
                 maxEpoch: userKeyData.maxEpoch,
-                salt: salt,
+                salt: salt!,
                 keyClaimName: "sub"
             };
 
     console.log("about to post zkpPayload = ", zkpPayload);
+
+    // jwt_randomness generating nonce = 264573711717505058782158437937925792376
+    // ephemeral public key = XF01e0SdNEDxyYjhAyeEwpk20VJkN53Y5WZhztIpOs4=
+    // generated nonce = CA9TzNvTFaqMzaWzBM766609iOc
+
+    
+
     // setPublicKey(zkpPayload.extendedEphemeralPublicKey);
+    // console.log("ephemeral public key BE:", toBigIntBE(
+    //                 Buffer.from(ephemeralPublicKeyArray),
+    //                 ).toString(), "LE: ",
+    //                 toBigIntLE(
+    //                 Buffer.from(ephemeralPublicKeyArray),
+    //                 ).toString(), "Array:",
+    //             ephemeralPublicKeyArray
+    //     );
 
     const res = await axios.post(url, zkpPayload)
 
@@ -120,6 +147,7 @@ const printUsefulInfo = (decodedJwt: LoginResponse, userKeyData: UserKeyData) =>
         console.log("exp = " + decodedJwt.exp);
         console.log("nonce = " + decodedJwt.nonce);
         console.log("ephemeralPublicKey b64 =", userKeyData.ephemeralPublicKey);
+        console.log("jwtRandomness =", userKeyData.randomness);
 }
 
 // Use your existing means of storing encrypted data
