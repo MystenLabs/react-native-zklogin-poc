@@ -75,11 +75,6 @@ const App = () => {
   const {suiClient} = useSui();
   const [suiVars, setSuiVars] = useState();
 
-  useEffect(() => {
-
-
-  }, []);
-
   const handleAuthorize = useCallback(async provider => {
     try {
 
@@ -93,11 +88,21 @@ const App = () => {
       };
       prefetchConfiguration(configuration);
 
+      // const registerConfig = {
+      //   additionalParameters: {
+      //     nonce: suiConst.nonce,
+      //   },
+      // };
+      // const registerResult = await register(registerConfig);
+
       const config = {
         ...(configs[provider]),
-        nonce: suiConst.nonce,
+        useNonce: false,
+        additionalParameters: {
+          nonce: suiConst.nonce,
+        },
         connectionTimeoutSeconds: 5,
-        iosPrefersEphemeralSession: true,
+        iosPrefersEphemeralSession: false,
       };
       console.log("Google auth request:", config);
       const newAuthState = await authorize(config);
