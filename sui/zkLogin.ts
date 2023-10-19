@@ -1,14 +1,17 @@
 import {fromB64} from "@mysten/sui.js/utils";
 import {SuiClient} from "@mysten/sui.js/client";
 import {Ed25519Keypair} from '@mysten/sui.js/keypairs/ed25519';
-import {generateNonce, generateRandomness} from '@mysten/zklogin';
+import {generateNonce, generateRandomness, genAddressSeed, getZkLoginSignature, jwtToAddress} from '@mysten/zklogin';
 // import EncryptedStorage from 'react-native-encrypted-storage';
 import axios from "axios";
 import jwt_decode from "jwt-decode"
 import {ADMIN_SECRET_KEY, SUI_NETWORK,} from "./config";
 import {toBigIntBE} from "bigint-buffer";
-import { AuthorizeResult } from "react-native-app-auth";
 import {Keypair, PublicKey} from "@mysten/sui.js/cryptography";
+import { ZkLoginSignatureInputs} from "@mysten/sui.js/dist/cjs/zklogin/bcs";
+import {TransactionBlock} from '@mysten/sui.js/transactions';
+import {SerializedSignature} from "@mysten/sui.js/cryptography";
+import {Alert} from 'react-native';
 
 console.log("Connecting to SUI network: ", SUI_NETWORK);
 
@@ -56,10 +59,10 @@ export const prepareLogin = async (suiClient: SuiClient) => {
     const nonce = generateNonce(ephemeralPublicKey, maxEpoch, jwt_randomness);
 
     // console.log("current epoch = " + epoch);
-    console.log("maxEpoch = " + maxEpoch);
-    console.log("jwt_randomness generating nonce = ", jwt_randomness);
-    console.log("ephemeral public key = " + ephemeralPublicKeyB64);
-    console.log("generated nonce = " + nonce);
+    // console.log("maxEpoch = " + maxEpoch);
+    // console.log("jwt_randomness generating nonce = ", jwt_randomness);
+    // console.log("ephemeral public key = " + ephemeralPublicKeyB64);
+    // console.log("generated nonce = " + nonce);
 
     const userKeyData: UserKeyData = {
         randomness: jwt_randomness.toString(),
@@ -105,39 +108,95 @@ export async function getZNPFromMystenAPI(jwtToken: string, salt: string, userKe
 
     const zkpPayload =
             {
-                jwt: jwtToken!,
+                jwt: jwtToken,
                 extendedEphemeralPublicKey: toBigIntBE(
                     Buffer.from(ephemeralPublicKeyArray),
                 ).toString(),
                 jwtRandomness: userKeyData.randomness,
                 maxEpoch: userKeyData.maxEpoch,
-                salt: salt!,
+                salt: salt,
                 keyClaimName: "sub"
             };
 
-    console.log("about to post zkpPayload = ", zkpPayload);
-
-    // jwt_randomness generating nonce = 264573711717505058782158437937925792376
-    // ephemeral public key = XF01e0SdNEDxyYjhAyeEwpk20VJkN53Y5WZhztIpOs4=
-    // generated nonce = CA9TzNvTFaqMzaWzBM766609iOc
-
-    
-
-    // setPublicKey(zkpPayload.extendedEphemeralPublicKey);
-    // console.log("ephemeral public key BE:", toBigIntBE(
-    //                 Buffer.from(ephemeralPublicKeyArray),
-    //                 ).toString(), "LE: ",
-    //                 toBigIntLE(
-    //                 Buffer.from(ephemeralPublicKeyArray),
-    //                 ).toString(), "Array:",
-    //             ephemeralPublicKeyArray
-    //     );
+    // console.log("about to post zkpPayload = ", zkpPayload);
 
     const res = await axios.post(url, zkpPayload)
 
-    console.log("received payload with Request for ZKP = ", res);
     return res;
 }
+
+export async function executeTransactionWithZKP(jwtToken: string, zkp: any, userKeyData: UserKeyData, salt: string, suiClient: SuiClient) {
+
+        const decodedJwt: LoginResponse = jwt_decode(jwtToken) as LoginResponse;
+        const {ephemeralKeyPair} = getEphemeralKeyPair(userKeyData);
+        const zkProof: ZkLoginSignatureInputs = zkp.data.zkp;
+        const userAddress = jwtToAddress(jwtToken, BigInt(salt));
+        const partialZkSignature = zkProof;
+        let transactionData:any = {};
+
+        if (!partialZkSignature || !ephemeralKeyPair || !userKeyData || !zkProof) {
+            Alert.alert("Transaction cannot proceed. Missing critical data.");
+            return;
+        }
+        console.log("zkProof", zkProof);
+
+        const txb = new TransactionBlock();
+
+        //Just a simple Demo call to create a little NFT weapon :p
+        txb.moveCall({
+            target: `0xf8294cd69d69d867c5a187a60e7095711ba237fad6718ea371bf4fbafbc5bb4b::teotest::create_weapon`,  //demo package published on testnet
+            arguments: [
+                txb.pure("Zero Knowledge Proof Axe 9000"),  // weapon name
+                txb.pure(66),  // weapon damage
+            ],
+        });
+        txb.setSender(userAddress!);
+
+        const signatureWithBytes = await txb.sign({client: suiClient, signer: ephemeralKeyPair});
+
+        console.log("Got SignatureWithBytes = ", signatureWithBytes);
+        console.log("maxEpoch = ", userKeyData.maxEpoch);
+        console.log("userSignature = ", signatureWithBytes.signature);
+
+        const addressSeed = genAddressSeed(BigInt(salt), "sub", decodedJwt.sub, decodedJwt.aud);
+
+        const zkSignature: SerializedSignature = getZkLoginSignature({
+            inputs: {
+                ...partialZkSignature,
+                addressSeed: addressSeed.toString(),
+            },
+            maxEpoch: userKeyData.maxEpoch,
+            userSignature: signatureWithBytes.signature,
+        });
+
+        suiClient.executeTransactionBlock({
+            transactionBlock: signatureWithBytes.bytes,
+            signature: zkSignature,
+            options: {
+                showEffects: true
+            }
+        }).then((response) => {
+            if (response.effects?.status.status == "success") {
+                console.log("Transaction executed! Digest = ", response.digest);
+                transactionData.txDigest(response.digest);
+            } else {
+                console.log("Transaction failed! reason = ", response.effects?.status)
+            }
+        }).catch((error) => {
+            console.log("Error During Tx Execution. Details: ", error);
+            if(error.toString().includes("Signature is not valid")){
+                Alert.alert("Signature is not valid. Please generate a new one by clicking on 'Get new ZK Proof'");
+            }
+        });
+        return transactionData;
+}
+
+function getEphemeralKeyPair(userKeyData: UserKeyData) {
+        let ephemeralKeyPairArray = Uint8Array.from(Array.from(fromB64(userKeyData.ephemeralPrivateKey!)));
+        const ephemeralKeyPair = Ed25519Keypair.fromSecretKey(ephemeralKeyPairArray);
+        return {ephemeralKeyPair};
+}
+
 
 const printUsefulInfo = (decodedJwt: LoginResponse, userKeyData: UserKeyData) => {
         console.log("iat  = " + decodedJwt.iat);

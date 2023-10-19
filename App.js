@@ -18,7 +18,7 @@ import {
   FormValue,
   Heading,
 } from './components';
-import {doLogin, prepareLogin, getSaltFromMystenAPI, getZNPFromMystenAPI, UserKeyData, LoginResponse} from "./sui/zkLogin";
+import {doLogin, prepareLogin, getSaltFromMystenAPI, getZNPFromMystenAPI, UserKeyData, LoginResponse, executeTransactionWithZKP} from "./sui/zkLogin";
 import {useSui} from "./sui/hooks/useSui";
 import jwt_decode from "jwt-decode";
 
@@ -113,9 +113,9 @@ const App = () => {
         ...newAuthState,
       });
 
-      console.log('Google auth jwt :', newAuthState);
+      // console.log('Google auth jwt :', newAuthState);
       const decodedJwt: LoginResponse = jwt_decode(newAuthState.idToken);
-      console.log('Google auth response.nonce :', decodedJwt.nonce);
+      // console.log('Google auth response.nonce :', decodedJwt.nonce);
 
       if (decodedJwt.nonce !== suiConst.nonce) {
         Alert.alert('Missatching Google nonce! Your auth try was probably spoofed');
@@ -124,11 +124,15 @@ const App = () => {
 
       const salt = await getSaltFromMystenAPI(newAuthState.idToken);
       // setSuiVars(...suiVars, salt);
-
       console.log("Salt:", salt);
 
       const zkp = await getZNPFromMystenAPI(newAuthState.idToken, salt, suiConst);
+      // setSuiVars(...suiVars, zkp);
       console.log("ZKP", zkp);
+
+      // Execute sample transaction
+      const transactionData = executeTransactionWithZKP(newAuthState.idToken, suiConst, zkp, salt);
+      console.log("Transaction finished:", transactionData);
 
     } catch (error) {
       Alert.alert('Failed to log in', error.message);
