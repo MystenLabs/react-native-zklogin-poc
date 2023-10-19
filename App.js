@@ -8,7 +8,6 @@ import {
   refresh,
   revoke,
   prefetchConfiguration,
-  register,
 } from 'react-native-app-auth';
 import {
   Page,
@@ -75,11 +74,6 @@ const App = () => {
   const [authState, setAuthState] = useState(defaultAuthState);
   const {suiClient} = useSui();
   const [suiVars, setSuiVars] = useState();
-
-  useEffect(() => {
-
-
-  }, []);
 
   const handleAuthorize = useCallback(async provider => {
     try {
