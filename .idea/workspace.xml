@@ -5,12 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fa23df52-fcdd-4352-9304-bee9cdc3a5fe" name="Changes" comment="Space minor changes">
+      <change afterPath="$PROJECT_DIR$/sui/webView.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/App.js" beforeDir="false" afterPath="$PROJECT_DIR$/App.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ios/mystenlabspoc.xcodeproj/project.pbxproj" beforeDir="false" afterPath="$PROJECT_DIR$/ios/mystenlabspoc.xcodeproj/project.pbxproj" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sui/zkLogin.ts" beforeDir="false" afterPath="$PROJECT_DIR$/sui/zkLogin.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -43,7 +43,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "web-view-approach",
     "last_opened_file_path": "/Users/vlegakis/Projects/MystenLabs/react-native-zklogin-poc",
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -68,7 +68,7 @@
       <updated>1696949282196</updated>
       <workItem from="1696949286138" duration="70000" />
       <workItem from="1696949406016" duration="22364000" />
-      <workItem from="1697466521263" duration="44382000" />
+      <workItem from="1697466521263" duration="52247000" />
     </task>
     <servers />
   </component>

@@ -21,6 +21,7 @@ import {
 import {doLogin, prepareLogin, getSaltFromMystenAPI, getZNPFromMystenAPI, UserKeyData, LoginResponse} from "./sui/zkLogin";
 import {useSui} from "./sui/hooks/useSui";
 import jwt_decode from "jwt-decode";
+import {AuthWebView } from "./sui/webView";
 
 const configExamples = {
   identityserver: {
@@ -79,6 +80,12 @@ const App = () => {
 
 
   }, []);
+
+  const handleAuthorizeWebView = useCallback(async provider => {
+
+
+
+  },[]);
 
   const handleAuthorize = useCallback(async provider => {
     try {
@@ -205,11 +212,13 @@ const App = () => {
             {/*  text="Authorize IdentityServer"*/}
             {/*  color="#DA2536"*/}
             {/*/>*/}
-            <Button
-              onPress={() => handleAuthorize('auth0')}
-              text="zkLogin with Google"
-              color="#DA2536"
-            />
+            {/*<Button*/}
+            {/*  onPress={() => handleAuthorizeWebVew()}*/}
+            {/*  // onPress={() => handleAuthorize('auth0')}*/}
+            {/*  text="zkLogin with Google"*/}
+            {/*  color="#DA2536"*/}
+            {/*/>*/}
+            <AuthWebView />
           </>
         ) : null}
         {authState.refreshToken ? (

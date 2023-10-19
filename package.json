@@ -24,7 +24,8 @@
     "react-native-url-polyfill": "^2.0.0",
     "react-native-app-auth": "^7.1.0",
     "jwt-decode": "^3.1.2",
-    "bigint-buffer": "^1.1.5"
+    "bigint-buffer": "^1.1.5",
+    "react-native-webview": "^13.6.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
