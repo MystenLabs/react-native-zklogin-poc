@@ -8,10 +8,11 @@ import jwt_decode from "jwt-decode"
 import {ADMIN_SECRET_KEY, SUI_NETWORK,} from "./config";
 import {toBigIntBE} from "bigint-buffer";
 import {Keypair, PublicKey} from "@mysten/sui.js/cryptography";
-import { ZkLoginSignatureInputs} from "@mysten/sui.js/dist/cjs/zklogin/bcs";
+import {ZkLoginSignatureInputs} from "@mysten/sui.js/dist/cjs/zklogin/bcs";
 import {TransactionBlock} from '@mysten/sui.js/transactions';
 import {SerializedSignature} from "@mysten/sui.js/cryptography";
 import {Alert} from 'react-native';
+import {LoginResponse, UserKeyData, GetSaltRequest, GetSaltResponse, ZKPRequest, ZKPPayload} from './types/UsefulTypes';
 
 console.log("Connecting to SUI network: ", SUI_NETWORK);
 
@@ -19,26 +20,6 @@ console.log("Connecting to SUI network: ", SUI_NETWORK);
 let adminPrivateKeyArray = Uint8Array.from(Array.from(fromB64(ADMIN_SECRET_KEY!)));
 const adminKeypair = Ed25519Keypair.fromSecretKey(adminPrivateKeyArray.slice(1));
 const adminAddress = adminKeypair.getPublicKey().toSuiAddress();
-
-export interface LoginResponse {
-    iss: string;
-    azp: string;
-    aud: string;
-    sub: string;
-    nbf: number;
-    exp: number;
-    iat: number;
-    jti: string;
-    nonce: string;
-};
-
-export interface UserKeyData {
-    randomness: string;
-    nonce: string;
-    ephemeralPublicKey: string;
-    ephemeralPrivateKey: string;
-    maxEpoch: number;
-};
 
 export const doLogin = async (suiClient: SuiClient) => {
     console.log("Starting sign up with zkLogin");
@@ -83,14 +64,14 @@ export async function getSaltFromMystenAPI(jwtEncoded: string){
     // const decodedJwt: LoginResponse = jwt_decode(jwtEncoded) as LoginResponse;
     // console.log("decodedJwt:", decodedJwt);
 
-    const payload = { token: jwtEncoded };
+    const payload = {token: jwtEncoded};
 
     // console.log("Getting salt:", payload, "decoded:", decodedJwt)
     const res = await axios.post(url, payload)
     return res.data.salt;
 }
 
-export async function getZNPFromMystenAPI(jwtToken: string, salt: string, userKeyData: UserKeyData){
+export async function getZNPFromMystenAPI(jwtToken: string, salt: string, userKeyData: UserKeyData, forceUpdate = true): Promise<ZkLoginSignatureInputs> {
 
     const url = "https://prover.mystenlabs.com/v1";
     const decodedJwt: LoginResponse = jwt_decode(jwtToken) as LoginResponse;
@@ -107,38 +88,46 @@ export async function getZNPFromMystenAPI(jwtToken: string, salt: string, userKe
     // }
 
     const zkpPayload =
-            {
-                jwt: jwtToken,
-                extendedEphemeralPublicKey: toBigIntBE(
-                    Buffer.from(ephemeralPublicKeyArray),
-                ).toString(),
-                jwtRandomness: userKeyData.randomness,
-                maxEpoch: userKeyData.maxEpoch,
-                salt: salt,
-                keyClaimName: "sub"
-            };
+        {
+            jwt: jwtToken,
+            extendedEphemeralPublicKey: toBigIntBE(
+                Buffer.from(ephemeralPublicKeyArray),
+            ).toString(),
+            jwtRandomness: userKeyData.randomness,
+            maxEpoch: userKeyData.maxEpoch,
+            salt: salt,
+            keyClaimName: "sub"
+        };
 
-    // console.log("about to post zkpPayload = ", zkpPayload);
+    // TODO: introduce caching logic here
+    // const ZKPRequest: ZKPRequest = {
+    //     zkpPayload,
+    //     forceUpdate
+    // }
 
-    const res = await axios.post(url, zkpPayload)
+    const proofResponse = await axios.post(url, zkpPayload)
 
-    return res;
+    if (!proofResponse?.data) {
+        Alert.alert("Error getting Zero Knowledge Proof. Please check that Prover Service is running.");
+        return;
+    }
+    return proofResponse?.data;
 }
 
-export async function executeTransactionWithZKP(jwtToken: string, zkp: any, userKeyData: UserKeyData, salt: string, suiClient: SuiClient) {
+export async function executeTransactionWithZKP(jwtToken: string, zkProof: ZkLoginSignatureInputs, userKeyData: UserKeyData, salt: string, suiClient: SuiClient) {
 
         const decodedJwt: LoginResponse = jwt_decode(jwtToken) as LoginResponse;
         const {ephemeralKeyPair} = getEphemeralKeyPair(userKeyData);
-        const zkProof: ZkLoginSignatureInputs = zkp.data.zkp;
         const userAddress = jwtToAddress(jwtToken, BigInt(salt));
         const partialZkSignature = zkProof;
         let transactionData:any = {};
 
-        if (!partialZkSignature || !ephemeralKeyPair || !userKeyData || !zkProof) {
+        if (!partialZkSignature || !ephemeralKeyPair || !userKeyData) {
             Alert.alert("Transaction cannot proceed. Missing critical data.");
             return;
         }
-        console.log("zkProof", zkProof);
+
+        console.log("Transaction: zkProof", zkProof, 'User address', userAddress);
 
         const txb = new TransactionBlock();
 
@@ -150,7 +139,7 @@ export async function executeTransactionWithZKP(jwtToken: string, zkp: any, user
                 txb.pure(66),  // weapon damage
             ],
         });
-        txb.setSender(userAddress!);
+        txb.setSender(userAddress);
 
         const signatureWithBytes = await txb.sign({client: suiClient, signer: ephemeralKeyPair});
 
@@ -192,7 +181,7 @@ export async function executeTransactionWithZKP(jwtToken: string, zkp: any, user
 }
 
 function getEphemeralKeyPair(userKeyData: UserKeyData) {
-        let ephemeralKeyPairArray = Uint8Array.from(Array.from(fromB64(userKeyData.ephemeralPrivateKey!)));
+        let ephemeralKeyPairArray = Uint8Array.from(Array.from(fromB64(userKeyData.ephemeralPrivateKey)));
         const ephemeralKeyPair = Ed25519Keypair.fromSecretKey(ephemeralKeyPairArray);
         return {ephemeralKeyPair};
 }
@@ -208,28 +197,32 @@ const printUsefulInfo = (decodedJwt: LoginResponse, userKeyData: UserKeyData) =>
         console.log("ephemeralPublicKey b64 =", userKeyData.ephemeralPublicKey);
         console.log("jwtRandomness =", userKeyData.randomness);
 }
-
-// Use your existing means of storing encrypted data
-// async function setEncrypted(data: any, key = "data") {
-//     try {
-//         await EncryptedStorage.setItem(
-//             key,
-//             JSON.stringify(data)
-//         );
-//     } catch (error) {
-//         // There was an error on the native side
-//     }
-// }
+// async function loadRequiredData(encodedJwt: string) {
+//         //Decoding JWT to get useful Info
+//         const decodedJwt: LoginResponse = await jwt_decode(encodedJwt!) as LoginResponse;
+//         let response:any = {}
+//         response.subject = decodedJwt.sub;
 //
-// async function getEncrypted(key="data") {
-//     try {
-//         const dataString = await EncryptedStorage.getItem(key);
-//
-//         if (dataString !== undefined) {
-//             this.resolve(JSON.parse(dataString))// Congrats! You've just retrieved your first value!
+//         //Getting Salt
+//         const userSalt = await getSalt(decodedJwt.sub, encodedJwt);
+//         if (!userSalt) {
+//             Alert.alert("Error getting userSalt");
+//             return;
 //         }
-//     } catch (error) {
-//         // There was an error on the native side
-//     }
+//
+//         //Generating User Address
+//         const address = jwtToAddress(encodedJwt!, BigInt(userSalt!));
+//
+//         setUserAddress(address);
+//         setUserSalt(userSalt!);
+//         const hasEnoughBalance = await checkIfAddressHasBalance(address);
+//         if(!hasEnoughBalance){
+//             await giveSomeTestCoins(address);
+//             toast.success("We' ve fetched some coins for you, so you can get started with Sui !", {   duration: 8000,} );
+//         }
+//
+//         console.log("All required data loaded. ZK Address =", address);
+//     return response;
 // }
+
 

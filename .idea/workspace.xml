@@ -5,8 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fa23df52-fcdd-4352-9304-bee9cdc3a5fe" name="Changes" comment="Space minor changes">
+      <change afterPath="$PROJECT_DIR$/sui/types/UsefulTypes.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/App.js" beforeDir="false" afterPath="$PROJECT_DIR$/App.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sui/types/UserInfo.ts" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/sui/zkLogin.ts" beforeDir="false" afterPath="$PROJECT_DIR$/sui/zkLogin.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -41,7 +43,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
     "git-widget-placeholder": "test-transaction",
-    "last_opened_file_path": "/Users/vlegakis/Projects/MystenLabs/react-native-zklogin-poc",
+    "last_opened_file_path": "/Users/vlegakis/Projects/MystenLabs/react-native-zklogin-poc/sui/types",
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
@@ -52,6 +54,7 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/sui/types" />
       <recent name="$PROJECT_DIR$" />
     </key>
   </component>
@@ -65,7 +68,7 @@
       <updated>1696949282196</updated>
       <workItem from="1696949286138" duration="70000" />
       <workItem from="1696949406016" duration="22364000" />
-      <workItem from="1697466521263" duration="59447000" />
+      <workItem from="1697466521263" duration="68198000" />
     </task>
     <servers />
   </component>
