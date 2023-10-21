@@ -21,6 +21,8 @@ let adminPrivateKeyArray = Uint8Array.from(Array.from(fromB64(ADMIN_SECRET_KEY!)
 const adminKeypair = Ed25519Keypair.fromSecretKey(adminPrivateKeyArray.slice(1));
 const adminAddress = adminKeypair.getPublicKey().toSuiAddress();
 
+const MINIMUM_BALANCE = 0.003;
+
 export const doLogin = async (suiClient: SuiClient) => {
     console.log("Starting sign up with zkLogin");
 }
@@ -66,8 +68,8 @@ export async function getSaltFromMystenAPI(jwtEncoded: string){
 
     const payload = {token: jwtEncoded};
 
-    // console.log("Getting salt:", payload, "decoded:", decodedJwt)
-    const res = await axios.post(url, payload)
+    // console.log("Getting salt:", payload, "decoded:", decodedJwt);
+    const res = await axios.post(url, payload);
     return res.data.salt;
 }
 
@@ -127,7 +129,11 @@ export async function executeTransactionWithZKP(jwtToken: string, zkProof: ZkLog
             return;
         }
 
-        console.log("Transaction: zkProof", zkProof, 'User address', userAddress);
+        const hasEnoughBalance = await checkIfAddressHasBalance(userAddress, suiClient);
+        if(!hasEnoughBalance){
+            await giveSomeTestCoins(userAddress, suiClient);
+            // Alert.alert("We' ve fetched some coins for you, so you can get started with Sui !");
+        }
 
         const txb = new TransactionBlock();
 
@@ -167,7 +173,7 @@ export async function executeTransactionWithZKP(jwtToken: string, zkProof: ZkLog
         }).then((response) => {
             if (response.effects?.status.status == "success") {
                 console.log("Transaction executed! Digest = ", response.digest);
-                transactionData.txDigest(response.digest);
+                transactionData.txDigest = response.digest;
             } else {
                 console.log("Transaction failed! reason = ", response.effects?.status)
             }
@@ -197,32 +203,59 @@ const printUsefulInfo = (decodedJwt: LoginResponse, userKeyData: UserKeyData) =>
         console.log("ephemeralPublicKey b64 =", userKeyData.ephemeralPublicKey);
         console.log("jwtRandomness =", userKeyData.randomness);
 }
-// async function loadRequiredData(encodedJwt: string) {
-//         //Decoding JWT to get useful Info
-//         const decodedJwt: LoginResponse = await jwt_decode(encodedJwt!) as LoginResponse;
-//         let response:any = {}
-//         response.subject = decodedJwt.sub;
-//
-//         //Getting Salt
-//         const userSalt = await getSalt(decodedJwt.sub, encodedJwt);
-//         if (!userSalt) {
-//             Alert.alert("Error getting userSalt");
-//             return;
-//         }
-//
-//         //Generating User Address
-//         const address = jwtToAddress(encodedJwt!, BigInt(userSalt!));
-//
-//         setUserAddress(address);
-//         setUserSalt(userSalt!);
-//         const hasEnoughBalance = await checkIfAddressHasBalance(address);
-//         if(!hasEnoughBalance){
-//             await giveSomeTestCoins(address);
-//             toast.success("We' ve fetched some coins for you, so you can get started with Sui !", {   duration: 8000,} );
-//         }
-//
-//         console.log("All required data loaded. ZK Address =", address);
-//     return response;
-// }
 
+ async function checkIfAddressHasBalance(address: string, suiClient: SuiClient): Promise<boolean> {
+        console.log("Checking whether address " + address + " has balance...");
+        const coins = await suiClient.getCoins({
+            owner: address,
+        });
+        //loop over coins
+        let totalBalance = 0;
+        for (const coin of coins.data) {
+            totalBalance += parseInt(coin.balance);
+        }
+        totalBalance = totalBalance / 1000000000;  //Converting MIST to SUI
+        console.log("total balance = ", totalBalance);
+        return enoughBalance(totalBalance);
+}
+
+function enoughBalance(userBalance: number) {
+        return userBalance > MINIMUM_BALANCE;
+}
+
+function getTestnetAdminSecretKey() {
+    return "AD9AkwDXwWTj3zpbWDS5rKuJPAmM4bJ4Kw5Nmnvx9yFO"; // process.env.NEXT_PUBLIC_ADMIN_SECRET_KEY;
+}
+
+async function giveSomeTestCoins(address: string, suiClient: SuiClient) {
+        console.log("Giving some test coins to address " + address);
+        const adminPrivateKey = getTestnetAdminSecretKey();
+        if (!adminPrivateKey) {
+            Alert.alert("Admin Secret Key not found. Please set NEXT_PUBLIC_ADMIN_SECRET_KEY environment variable.");
+            return
+        }
+        let adminPrivateKeyArray = Uint8Array.from(Array.from(fromB64(adminPrivateKey)));
+        const adminKeypair = Ed25519Keypair.fromSecretKey(adminPrivateKeyArray.slice(1));
+        const tx = new TransactionBlock();
+        const giftCoin = tx.splitCoins(tx.gas, [tx.pure(30000000)]);
+
+        tx.transferObjects([giftCoin], tx.pure(address));
+
+        const res = await suiClient.signAndExecuteTransactionBlock({
+            transactionBlock: tx,
+            signer: adminKeypair,
+            requestType: "WaitForLocalExecution",
+            options: {
+                showEffects: true,
+            },
+        });
+        const status = res?.effects?.status?.status;
+        if (status === "success") {
+            console.log("Gift Coin transfer executed! status = ", status);
+            checkIfAddressHasBalance(address, suiClient);
+        }
+        if (status == "failure") {
+            Alert.alert("Gift Coin transfer Failed. Error = " + res?.effects);
+        }
+}
 

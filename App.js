@@ -130,12 +130,12 @@ const App = () => {
       const zkp = await getZNPFromMystenAPI(newAuthState.idToken, salt, suiConst);
       // setSuiVars(...suiVars, zkp);
       const address = jwtToAddress(newAuthState.idToken, BigInt(salt));
-      console.log("ZKP", zkp, 'my Address', address);
+      console.log("ZKP:", zkp, 'my Address:', address);
 
 
       // Execute sample transaction
-      // const transactionData = executeTransactionWithZKP(newAuthState.idToken, zkp, suiConst, salt, suiClient);
-      // console.log("Transaction finished:", transactionData);
+      const transactionData = executeTransactionWithZKP(newAuthState.idToken, zkp, suiConst, salt, suiClient);
+      console.log("Transaction finished:", transactionData);
 
     } catch (error) {
       Alert.alert('Failed to log in', error.message);
