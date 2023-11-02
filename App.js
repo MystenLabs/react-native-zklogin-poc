@@ -98,7 +98,7 @@ const App = () => {
 
       const config = {
         ...(configs[provider]),
-        useNonce: false,
+        useNonce: true,
         additionalParameters: {
           nonce: suiConst.nonce,
         },
