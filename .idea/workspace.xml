@@ -5,8 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fa23df52-fcdd-4352-9304-bee9cdc3a5fe" name="Changes" comment="Space minor changes">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/App.js" beforeDir="false" afterPath="$PROJECT_DIR$/App.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ios/mystenlabspoc/Info.plist" beforeDir="false" afterPath="$PROJECT_DIR$/ios/mystenlabspoc/Info.plist" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -86,7 +85,7 @@
       <workItem from="1699950709164" duration="1196000" />
       <workItem from="1700045144408" duration="2349000" />
       <workItem from="1700223082851" duration="598000" />
-      <workItem from="1700555384769" duration="3526000" />
+      <workItem from="1700555384769" duration="3773000" />
     </task>
     <servers />
   </component>
