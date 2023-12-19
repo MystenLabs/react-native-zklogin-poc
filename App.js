@@ -115,7 +115,7 @@ const App = () => {
       });
 
       // console.log('Google auth jwt :', newAuthState);
-      const decodedJwt: LoginResponse = jwt_decode(newAuthState.idToken);
+      const decodedJwt = jwt_decode(newAuthState.idToken);
       // console.log('Google auth response.nonce :', decodedJwt.nonce);
 
       if (decodedJwt.nonce !== suiConst.nonce) {
