@@ -30,50 +30,7 @@ import {
 import {useSui} from "./sui/hooks/useSui";
 import jwt_decode from "jwt-decode";
 import {generateNonce, generateRandomness, genAddressSeed, getZkLoginSignature, jwtToAddress} from '@mysten/zklogin';
-
-const configExamples = {
-    identityserver: {
-        issuer: 'https://demo.duendesoftware.com',
-        clientId: 'interactive.public',
-        redirectUrl: 'io.identityserver.demo:/oauthredirect',
-        additionalParameters: {},
-        scopes: ['openid', 'profile', 'email', 'offline_access'],
-
-        // serviceConfiguration: {
-        //   authorizationEndpoint: 'https://demo.duendesoftware.com/connect/authorize',
-        //   tokenEndpoint: 'https://demo.duendesoftware.com/connect/token',
-        //   revocationEndpoint: 'https://demo.duendesoftware.com/connect/revoke'
-        // }
-    },
-    auth0: {
-        // From https://openidconnect.net/
-        issuer: 'https://samples.auth0.com',
-        clientId: 'kbyuFDidLLm280LIwVFiazOqjO3ty8KH',
-        redirectUrl: 'https://openidconnect.net/callback',
-        additionalParameters: {},
-        scopes: ['openid', 'profile', 'email', 'phone', 'address'],
-
-        // serviceConfiguration: {
-        //   authorizationEndpoint: 'https://samples.auth0.com/authorize',
-        //   tokenEndpoint: 'https://samples.auth0.com/oauth/token',
-        //   revocationEndpoint: 'https://samples.auth0.com/oauth/revoke'
-        // }
-    },
-    auth1: {
-        // From https://openidconnect.net/
-        issuer: 'https://samples.auth0.com',
-        clientId: 'kbyuFDidLLm280LIwVFiazOqjO3ty8KH',
-        redirectUrl: 'https://openidconnect.net/callback',
-        additionalParameters: {},
-        scopes: ['openid', 'profile', 'email', 'phone', 'address'],
-
-        // serviceConfiguration: {
-        //   authorizationEndpoint: 'https://samples.auth0.com/authorize',
-        //   tokenEndpoint: 'https://samples.auth0.com/oauth/token',
-        //   revocationEndpoint: 'https://samples.auth0.com/oauth/revoke'
-        // }
-    },
-};
+import { EnokiFlow } from "@mysten/enoki";
 
 const configs = {
     auth0: {
@@ -104,16 +61,26 @@ const App = () => {
     const [authState, setAuthState] = useState(defaultAuthState);
     const {suiClient} = useSui();
     const [suiVars, setSuiVars] = useState();
+    // const [enokiFlow, setEnokiFlow] = useState();
+    // useEffect(() => {
+    //     setEnokiFlow(new EnokiFlow({
+    //         apiKey: "enoki_apikey_3662ad8b95e837bc26cf41dee4900d37",
+    //     }));
+    // }, []);
 
     const handleAuthorize = useCallback(async provider => {
         try {
 
+            const enokiFlow = new EnokiFlow({
+                apiKey: "enoki_apikey_3662ad8b95e837bc26cf41dee4900d37",
+            });
+
             const suiConst = await prepareLogin(suiClient);
+
             setSuiVars(suiConst);
             const configuration = {
                 warmAndPrefetchChrome: true,
                 connectionTimeoutSeconds: 5,
-                nonce: suiConst.nonce,
                 ...configs.auth0,
             };
             prefetchConfiguration(configuration);
@@ -153,6 +120,36 @@ const App = () => {
                 return;
             }
 
+
+            // Enoki Flow
+            enokiFlow.handleAuthCallback(`#${newAuthState.idToken}`)
+                    .then(async (res) => {
+                        console.log({ res });
+                        const session = await enokiFlow.getSession();
+                        const keypair = session?.ephemeralKeyPair;
+                        let privateKeyArray = Uint8Array.from(Array.from(fromB64(keypair)));
+                        const address = Ed25519Keypair.fromSecretKey(privateKeyArray)
+                            .getPublicKey()
+                            .toSuiAddress();
+                        const jwt = session?.jwt;
+                        const decodedJwt: any = jwtDecode(jwt);
+                        const userRole = JSON.parse(res || "{}").userRole;
+
+                        console.log({decodedJwt});
+                        // handleLoginAs({
+                        //     firstName: decodedJwt["given_name"],
+                        //     lastName: decodedJwt["family_name"],
+                        //     role: userRole,
+                        //     email: decodedJwt["email"],
+                        //     picture: decodedJwt["picture"],
+                        //     address,
+                        //     zkLoginSession: session as ZkLoginSession,
+                        // });
+                    });
+
+            return;
+
+            // zkLogin Flow
             const salt = await getSaltFromMystenAPI(newAuthState.idToken);
             // setSuiVars(...suiVars, salt);
             console.log("Salt:", salt);
