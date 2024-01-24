@@ -25,12 +25,13 @@ import {
     getZNPFromMystenAPI,
     UserKeyData,
     LoginResponse,
-    executeTransactionWithZKP
+    executeTransactionWithZKP,
+    getZNPFromEnoki,
+    getSaltFromEnoki,
 } from "./sui/zkLogin";
 import {useSui} from "./sui/hooks/useSui";
 import jwt_decode from "jwt-decode";
 import {generateNonce, generateRandomness, genAddressSeed, getZkLoginSignature, jwtToAddress} from '@mysten/zklogin';
-import { EnokiFlow } from "@mysten/enoki";
 
 const configs = {
     auth0: {
@@ -71,9 +72,80 @@ const App = () => {
     const handleAuthorize = useCallback(async provider => {
         try {
 
-            const enokiFlow = new EnokiFlow({
-                apiKey: "enoki_apikey_3662ad8b95e837bc26cf41dee4900d37",
+            const suiConst = await prepareLogin(suiClient);
+
+            setSuiVars(suiConst);
+            const configuration = {
+                warmAndPrefetchChrome: true,
+                connectionTimeoutSeconds: 5,
+                ...configs.auth0,
+            };
+            prefetchConfiguration(configuration);
+
+            // const registerConfig = {
+            //   additionalParameters: {
+            //     nonce: suiConst.nonce,
+            //   },
+            // };
+            // const registerResult = await register(registerConfig);
+
+            const config = {
+                ...(configs[provider]),
+                useNonce: false,
+                additionalParameters: {
+                    nonce: suiConst.nonce,
+                },
+                connectionTimeoutSeconds: 5,
+                iosPrefersEphemeralSession: true,
+                prefersEphemeralWebBrowserSession: true,
+            };
+
+            const newAuthState = await authorize(config);
+
+            setAuthState({
+                hasLoggedInOnce: true,
+                provider: provider,
+                ...newAuthState,
             });
+
+            console.log('Google auth jwt :', newAuthState.idToken);
+            console.log('From SUI const :', suiConst);
+
+
+            const decodedJwt = jwt_decode(newAuthState.idToken);
+            console.log('Google auth response.nonce :', decodedJwt.nonce);
+
+            if (decodedJwt.nonce !== suiConst.nonce) {
+                Alert.alert('Missatching Google nonce! Your auth try was probably spoofed');
+                return;
+            }
+
+            console.log("Google JWT response:", newAuthState.idToken);
+
+            // zkLogin Flow
+            const salt = await getSaltFromMystenAPI(newAuthState.idToken);
+            // setSuiVars(...suiVars, salt);
+            console.log("Salt:", salt);
+
+            const zkp = await getZNPFromMystenAPI(newAuthState.idToken, salt, suiConst);
+            // setSuiVars(...suiVars, zkp);
+            const address = jwtToAddress(newAuthState.idToken, BigInt(salt));
+            console.log("ZKP:", zkp, 'my Address:', address);
+
+
+            // Execute sample transaction
+            const transactionData = executeTransactionWithZKP(newAuthState.idToken, zkp, suiConst, salt, suiClient);
+            console.log("Transaction finished:", transactionData);
+
+        } catch (error) {
+            Alert.alert('Failed to log in', error.message);
+            console.log("log in Error:", error);
+        }
+
+    }, []);
+
+    const handleAuthorize2 = useCallback(async provider => {
+        try {
 
             const suiConst = await prepareLogin(suiClient);
 
@@ -102,7 +174,7 @@ const App = () => {
                 iosPrefersEphemeralSession: true,
                 prefersEphemeralWebBrowserSession: true,
             };
-            console.log("Google auth request:", config);
+
             const newAuthState = await authorize(config);
 
             setAuthState({
@@ -111,57 +183,33 @@ const App = () => {
                 ...newAuthState,
             });
 
-            // console.log('Google auth jwt :', newAuthState);
+            console.log('Google auth jwt :', newAuthState.idToken);
+            console.log('From SUI const :', suiConst);
+
+
             const decodedJwt = jwt_decode(newAuthState.idToken);
-            // console.log('Google auth response.nonce :', decodedJwt.nonce);
+            console.log('Google auth response.nonce :', decodedJwt.nonce);
 
             if (decodedJwt.nonce !== suiConst.nonce) {
                 Alert.alert('Missatching Google nonce! Your auth try was probably spoofed');
                 return;
             }
 
-
-            // Enoki Flow
-            enokiFlow.handleAuthCallback(`#${newAuthState.idToken}`)
-                    .then(async (res) => {
-                        console.log({ res });
-                        const session = await enokiFlow.getSession();
-                        const keypair = session?.ephemeralKeyPair;
-                        let privateKeyArray = Uint8Array.from(Array.from(fromB64(keypair)));
-                        const address = Ed25519Keypair.fromSecretKey(privateKeyArray)
-                            .getPublicKey()
-                            .toSuiAddress();
-                        const jwt = session?.jwt;
-                        const decodedJwt: any = jwtDecode(jwt);
-                        const userRole = JSON.parse(res || "{}").userRole;
-
-                        console.log({decodedJwt});
-                        // handleLoginAs({
-                        //     firstName: decodedJwt["given_name"],
-                        //     lastName: decodedJwt["family_name"],
-                        //     role: userRole,
-                        //     email: decodedJwt["email"],
-                        //     picture: decodedJwt["picture"],
-                        //     address,
-                        //     zkLoginSession: session as ZkLoginSession,
-                        // });
-                    });
-
-            return;
+            console.log("Google JWT response:", newAuthState.idToken);
 
             // zkLogin Flow
-            const salt = await getSaltFromMystenAPI(newAuthState.idToken);
+            const salt = await getSaltFromEnoki(newAuthState.idToken, "enoki_apikey_3662ad8b95e837bc26cf41dee4900d37");
             // setSuiVars(...suiVars, salt);
-            console.log("Salt:", salt);
+            console.log("Salt from enoki:", salt);
 
-            const zkp = await getZNPFromMystenAPI(newAuthState.idToken, salt, suiConst);
+            const zkp = await getZNPFromEnoki(newAuthState.idToken, suiConst, "enoki_apikey_3662ad8b95e837bc26cf41dee4900d37");
             // setSuiVars(...suiVars, zkp);
-            const address = jwtToAddress(newAuthState.idToken, BigInt(salt));
-            console.log("ZKP:", zkp, 'my Address:', address);
+            // const address = jwtToAddress(newAuthState.idToken, BigInt(salt));
+            console.log("ZKP from enoki:", zkp, 'my Address:', salt.address);
 
 
             // Execute sample transaction
-            const transactionData = executeTransactionWithZKP(newAuthState.idToken, zkp, suiConst, salt, suiClient);
+            const transactionData = executeTransactionWithZKP(newAuthState.idToken, zkp, suiConst, salt.salt, suiClient);
             console.log("Transaction finished:", transactionData);
 
         } catch (error) {
@@ -296,14 +344,14 @@ const App = () => {
             <ButtonContainer>
                 {!authState.accessToken ? (
                     <>
-                        {/*<Button*/}
-                        {/*  onPress={() => handleAuthorize('identityserver')}*/}
-                        {/*  text="Authorize IdentityServer"*/}
-                        {/*  color="#DA2536"*/}
-                        {/*/>*/}
+                        <Button
+                          onPress={() => handleAuthorize2('auth0')}
+                          text="zkLogin with Enoki"
+                          color="#DA2536"
+                        />
                         <Button
                             onPress={() => handleAuthorize('auth0')}
-                            text="zkLogin with Google"
+                            text="zkLogin deprecated flow"
                             color="#DA2536"
                         />
                     </>
