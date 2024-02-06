@@ -15,31 +15,31 @@ export interface UserKeyData {
     randomness: string;
     nonce: string;
     ephemeralPublicKey: string;
+    ephemeralPublicKeyRaw: string;
     ephemeralPrivateKey: string;
-    maxEpoch:number;
+    maxEpoch: number;
 }
 
 
 export interface GetSaltRequest {
     jwt: string;
-    subject:string;
+    subject: string;
 }
 
 export interface GetSaltResponse {
-    subject:string;
-    salt:string;
+    subject: string;
+    salt: string;
 }
 
 export interface ZKPRequest {
     zkpPayload: ZKPPayload;
     forceUpdate: boolean;
 }
-export interface ZKPPayload
-    {
-        jwt: string,
-        extendedEphemeralPublicKey: string,
-        jwtRandomness: string,
-        maxEpoch: number,
-        salt: string,
-        keyClaimName: string
-    };
+export interface ZKPPayload {
+    jwt: string,
+    extendedEphemeralPublicKey: string,
+    jwtRandomness: string,
+    maxEpoch: number,
+    salt: string,
+    keyClaimName: string
+};
