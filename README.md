@@ -4,9 +4,9 @@ This is a POC example implementation of zkLogin for a React Native client.
 
 It uses 2 ways to zkLogin:
 1) Enoki,
-It utilises Enoki service to acquired all required nonce, salt zero knoledge proof and signs a transaction with these. More on the Enoki service can be found here: https://docs.enoki.mystenlabs.com/
+It utilises Enoki service to acquire all required nonce, salt zero knowledge proof and signs a transaction with these. More on the Enoki service can be found here: https://docs.enoki.mystenlabs.com/
 2) zkLogin native, 
-It creates locally a nonce then, a Salt, logs in with Google and then using Google's jwt token it acquires ephemeral keys from the Mysten Lab's prover service. 
+It creates locally a nonce then, a Salt, logs in with Google and then using Google's jwt token it acquires ephemeral keys from the Mysten Lab's DEV prover service. 
 Then with these it is signing an example transaction to make sure everything is working fine.
 
 UI wise everything is logged in the user's mobile.
