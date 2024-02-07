@@ -14,6 +14,7 @@
     "@craftzdog/react-native-buffer": "^6.0.5",
     "@mysten/sui.js": "^0.44.0",
     "@mysten/zklogin": "^0.3.2",
+    "@mysten/enoki": "^0.0.8",
     "axios": "^1.5.1",
     "base-64": "^1.0.0",
     "expo": "~49.0.12",

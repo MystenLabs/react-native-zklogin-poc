@@ -5,10 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fa23df52-fcdd-4352-9304-bee9cdc3a5fe" name="Changes" comment="Space minor changes">
-      <change afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/react-native-zklogin-poc.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/App.js" beforeDir="false" afterPath="$PROJECT_DIR$/App.js" afterDir="false" />
+<<<<<<< HEAD
+=======
+      <change beforePath="$PROJECT_DIR$/sui/types/UsefulTypes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/sui/types/UsefulTypes.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sui/zkLogin.ts" beforeDir="false" afterPath="$PROJECT_DIR$/sui/zkLogin.ts" afterDir="false" />
+>>>>>>> af2766eb6f5a56f7b2d0a89f4b726d22421251bf
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -38,17 +44,23 @@
   </component>
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
+    &quot;ASKED_MARK_IGNORED_FILES_AS_EXCLUDED&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+<<<<<<< HEAD
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/vlegakis/Projects/MystenLabs/react-native-zklogin-poc&quot;,
+=======
+    &quot;git-widget-placeholder&quot;: &quot;enoki-integration&quot;,
     &quot;last_opened_file_path&quot;: &quot;/Users/vlegakis/Projects/MystenLabs/react-native-zklogin-poc/sui/types&quot;,
+>>>>>>> af2766eb6f5a56f7b2d0a89f4b726d22421251bf
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;/Applications/IntelliJ IDEA.app/Contents/plugins/javascript-impl/jsLanguageServicesImpl/external&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/Users/vlegakis/Projects/MystenLabs/react-native-zklogin-poc/node_modules/typescript/lib&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
   &quot;keyToStringList&quot;: {
@@ -74,12 +86,34 @@
       <workItem from="1696949286138" duration="70000" />
       <workItem from="1696949406016" duration="22364000" />
       <workItem from="1697466521263" duration="69819000" />
+<<<<<<< HEAD
+      <workItem from="1697820663404" duration="5121000" />
+      <workItem from="1698916992223" duration="2417000" />
+      <workItem from="1699101381059" duration="1431000" />
+      <workItem from="1702987098852" duration="1314000" />
+=======
       <workItem from="1697820663404" duration="5728000" />
       <workItem from="1698155502503" duration="3214000" />
       <workItem from="1698244300647" duration="597000" />
       <workItem from="1698659066478" duration="598000" />
       <workItem from="1698842315034" duration="598000" />
-      <workItem from="1698934407495" duration="654000" />
+      <workItem from="1698934407495" duration="2450000" />
+      <workItem from="1699017127330" duration="598000" />
+      <workItem from="1699359248909" duration="9152000" />
+      <workItem from="1699950162749" duration="7000" />
+      <workItem from="1699950183913" duration="509000" />
+      <workItem from="1699950709164" duration="1196000" />
+      <workItem from="1700045144408" duration="2349000" />
+      <workItem from="1700223082851" duration="598000" />
+      <workItem from="1700555384769" duration="4622000" />
+      <workItem from="1701272034153" duration="16000" />
+      <workItem from="1701272065277" duration="598000" />
+      <workItem from="1702148261377" duration="55000" />
+      <workItem from="1703071555330" duration="8863000" />
+      <workItem from="1704467729529" duration="688000" />
+      <workItem from="1706031907999" duration="6807000" />
+      <workItem from="1706047341486" duration="1197000" />
+>>>>>>> af2766eb6f5a56f7b2d0a89f4b726d22421251bf
     </task>
     <servers />
   </component>
