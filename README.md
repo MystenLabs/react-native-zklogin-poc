@@ -19,12 +19,11 @@ This is a standard React Native application. This POC has been tested in iOS for
 
 1) Cocoapods (iOS package manager), https://formulae.brew.sh/formula/cocoapods
 2) React Native, https://reactnative.dev/docs/environment-setup
-3) XCode along with Apple's Command line tools along with at least an iOS simulator (or connected device setup in developer mode in case you want to run it directly there) 
+3) XCode along with Apple's Command line tools as well as at least an iOS simulator (or connected device setup in developer mode in case you want to run it directly on your device) 
 
 ### Running the application 
 1) Install react native dependencies: In the root folder run `npm i`
-2) Then install iOS dependencies: In the `ios` folder run `pod install`
-3) Run the application: In the root folder run `npm run ios`
+2) Run the application: In the root folder run `npm run ios`
 
 
 ![Screenshot 2024-02-07 at 8.10.51 PM.png](assets%2FScreenshot%202024-02-07%20at%208.10.51%E2%80%AFPM.png)
