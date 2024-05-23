@@ -30,7 +30,7 @@ export const doLogin = async (suiClient: SuiClient) => {
 export const prepareLogin = async (suiClient: SuiClient) => {
     const { epoch, epochDurationMs, epochStartTimestampMs } = await suiClient.getLatestSuiSystemState();
 
-    const maxEpoch = parseInt(epoch) + 2; // this means the ephemeral key will be active for 2 epochs from now.
+    const maxEpoch = parseInt(epoch) + 30; // this means the ephemeral key will be active for 2 epochs from now.
     const ephemeralKeyPair: Keypair = new Ed25519Keypair();
     const ephemeralPrivateKeyB64 = ephemeralKeyPair.export().privateKey;
 
@@ -242,7 +242,7 @@ export async function executeTransactionWithZKP(jwtToken: string, zkProof: ZkLog
     }).catch((error) => {
         console.log("Error During Tx Execution. Details: ", error);
         if (error.toString().includes("Signature is not valid")) {
-            Alert.alert("Signature is not valid. Please generate a new one by clicking on 'Get new ZK Proof'");
+            Alert.alert("Signature is not valid. Please generate a new one");
         }
     });
     return transactionData;

@@ -111,7 +111,6 @@ const App = () => {
             console.log('Google auth jwt :', newAuthState.idToken);
             console.log('From SUI const :', suiConst);
 
-
             const decodedJwt = jwt_decode(newAuthState.idToken);
             console.log('Google auth response.nonce :', decodedJwt.nonce);
 
